@@ -18,7 +18,9 @@ else:
 
 
 #use case 
-query = """Tell me about Riemann Curvature tensor in two lines"""
+with open("test.txt", "r", encoding="utf-8") as f:
+    query = f.read()
+
 
 messages = [{"role":"user", "content":query}]
 
