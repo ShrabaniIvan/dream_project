@@ -10,11 +10,6 @@ services:
       - "8001:8001"
     environment:
       - SERVICE_NAME=descriptive-stats
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
     networks:
       - ag-stats-network
 
@@ -27,11 +22,6 @@ services:
       - "8002:8002"
     environment:
       - SERVICE_NAME=time-series
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
     networks:
       - ag-stats-network
 
@@ -44,11 +34,6 @@ services:
       - "8003:8003"
     environment:
       - SERVICE_NAME=predictive-modeling
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
     networks:
       - ag-stats-network
 
@@ -64,12 +49,9 @@ services:
       - TIME_SERIES_URL=http://time-series:8002
       - PREDICTIVE_MODELING_URL=http://predictive-modeling:8003
     depends_on:
-      descriptive-stats:
-        condition: service_healthy
-      time-series:
-        condition: service_healthy
-      predictive-modeling:
-        condition: service_healthy
+      - descriptive-stats
+      - time-series
+      - predictive-modeling
     networks:
       - ag-stats-network
 

@@ -100,7 +100,7 @@ elif page == "Descriptive Statistics":
         df = load_sample_data("descriptive_sample.csv")
 
         if df is not None and st.button("Calculate Correlation"):
-            payload = {col: df[col].tolist() for col in df.columns}
+            payload = {"data": {col: df[col].tolist() for col in df.columns}}
 
             try:
                 response = requests.post(

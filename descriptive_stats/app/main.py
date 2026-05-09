@@ -11,6 +11,14 @@ class DataInput(BaseModel):
     column: str
     data: list
 
+class CorrelationInput(BaseModel):
+    data: Dict[str, list]
+
+class HypothesisTestInput(BaseModel):
+    data1: list
+    data2: list
+    test_type: str = "ttest"
+
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
@@ -33,9 +41,9 @@ def get_descriptive_stats(input_data: DataInput) -> Dict[str, Any]:
     }
 
 @app.post("/correlation-matrix")
-def get_correlation_matrix(data: Dict[str, list]) -> Dict[str, Any]:
+def get_correlation_matrix(input_data: CorrelationInput) -> Dict[str, Any]:
     """Calculate correlation matrix for dataset."""
-    df = pd.DataFrame(data)
+    df = pd.DataFrame(input_data.data)
     corr_matrix = df.corr()
 
     return {
@@ -44,20 +52,20 @@ def get_correlation_matrix(data: Dict[str, list]) -> Dict[str, Any]:
     }
 
 @app.post("/hypothesis-test")
-def hypothesis_test(data1: list, data2: list, test_type: str = "ttest") -> Dict[str, Any]:
+def hypothesis_test(input_data: HypothesisTestInput) -> Dict[str, Any]:
     """Perform hypothesis testing (t-test or Mann-Whitney U)."""
     from scipy import stats
 
-    if test_type == "ttest":
-        statistic, p_value = stats.ttest_ind(data1, data2)
+    if input_data.test_type == "ttest":
+        statistic, p_value = stats.ttest_ind(input_data.data1, input_data.data2)
         return {
             "test": "Independent t-test",
             "statistic": float(statistic),
             "p_value": float(p_value),
             "significant_at_0.05": float(p_value) < 0.05
         }
-    elif test_type == "mannwhitney":
-        statistic, p_value = stats.mannwhitneyu(data1, data2)
+    elif input_data.test_type == "mannwhitney":
+        statistic, p_value = stats.mannwhitneyu(input_data.data1, input_data.data2)
         return {
             "test": "Mann-Whitney U test",
             "statistic": float(statistic),
