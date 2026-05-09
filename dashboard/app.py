@@ -96,23 +96,103 @@ def load_sample_data(filename: str, folder: str = "") -> pd.DataFrame:
 # PAGE: Home
 if page == "Home":
     st.markdown("""
-    ## Welcome to Agricultural Statistics Platform
+    ## 🌾 Welcome to Agricultural Statistics Platform
 
-    This platform provides statistical analysis tools for agricultural data:
+    A comprehensive platform for statistical analysis of agricultural data using Python statsmodels and machine learning.
 
-    - **Descriptive Statistics**: Summary statistics, correlation, hypothesis testing
-    - **Time Series Analysis**: Decomposition, ARIMA, stationarity testing
-    - **Predictive Modeling**: Linear regression, feature importance analysis
+    ### 📊 Available Modules
 
-    Use the sidebar to navigate between different analysis modules.
+    **1. Descriptive Statistics** - Summarize and compare agricultural data
+    - Summary Statistics: Mean, median, std, quartiles, min/max
+    - Correlation Analysis: Identify relationships between variables
+    - Hypothesis Testing: Compare groups (t-test, Mann-Whitney U)
+
+    **2. Time Series Analysis** - Analyze temporal patterns in agricultural data
+    - ACF/PACF Analysis: Autocorrelation patterns
+    - Seasonal Decomposition: Trend, seasonal, residual components
+    - ARIMA Modeling: Forecasting and model fitting
+    - Stationarity Testing: ADF test for data properties
+
+    **3. Predictive Modeling** - Build regression models for forecasting
+    - Linear Regression: Feature relationships and predictions
+    - Feature Importance: Identify key influencing factors
+    - Model Evaluation: R², RMSE, MSE metrics
+
+    ### 🚀 Quick Start
+    1. Select a module from the sidebar
+    2. Choose a pre-loaded agricultural dataset from the dropdown
+    3. Click the analysis button
+    4. Review results and visualizations
+
+    ### 📁 Data Format
+    All datasets are **CSV files** with:
+    - Headers in first row
+    - Numeric values (comma-separated)
+    - Consistent data types per column
+    - No missing values
+
+    ### 📚 Sample Datasets Available
+    - **Descriptive Stats**: 5 agricultural datasets (150-320 samples)
+    - **Time Series**: 7 temporal datasets (60-1460 samples)
+    - **Predictive Modeling**: 4 regression datasets (350-500 samples)
     """)
 
-    st.info("ℹ️ Services Status: Check individual pages to verify service connectivity")
+    st.info("ℹ️ All services are running. Navigate to modules using the sidebar to begin analysis.")
 
 # PAGE: Descriptive Statistics
 elif page == "Descriptive Statistics":
-    st.header("Descriptive Statistics")
+    st.header("📊 Descriptive Statistics")
 
+    with st.expander("📖 Methods & Data Format Guide", expanded=True):
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown("""
+            ### 📋 Available Methods
+
+            **1. Summary Statistics**
+            - Count, Mean, Median
+            - Standard Deviation
+            - Min, Max, Q25, Q75
+
+            **2. Correlation Matrix**
+            - Pearson correlation coefficients
+            - Identifies variable relationships
+            - Values range from -1 to +1
+
+            **3. Hypothesis Testing**
+            - Independent t-test
+            - Mann-Whitney U test
+            - P-values for significance
+            """)
+
+        with col2:
+            st.markdown("""
+            ### 📄 Data Format Requirements
+
+            **Input Format**: CSV file (comma-separated)
+
+            **Structure**:
+            ```
+            column1, column2, column3
+            10.5,    20.3,    5.2
+            15.2,    18.9,    6.1
+            12.8,    22.1,    4.8
+            ```
+
+            **Requirements**:
+            - Numeric values only
+            - Headers in first row
+            - No missing values
+            - Consistent data types
+
+            **Supported Operations**:
+            - Single column analysis
+            - Multi-column correlations
+            - Two-group comparisons
+            """)
+
+    st.markdown("---")
     tab1, tab2, tab3 = st.tabs(["Summary Stats", "Correlation", "Hypothesis Testing"])
 
     with tab1:
@@ -247,8 +327,72 @@ elif page == "Descriptive Statistics":
 
 # PAGE: Time Series Analysis
 elif page == "Time Series Analysis":
-    st.header("Time Series Analysis")
+    st.header("📈 Time Series Analysis")
 
+    with st.expander("📖 Methods & Data Format Guide", expanded=True):
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown("""
+            ### 📋 Available Methods
+
+            **1. ACF/PACF Analysis**
+            - Autocorrelation Function
+            - Partial Autocorrelation
+            - Identifies lag patterns
+            - Lags: 5-40 adjustable
+
+            **2. Seasonal Decomposition**
+            - Trend component
+            - Seasonal component
+            - Residual component
+            - Additive decomposition
+
+            **3. ARIMA Modeling**
+            - AutoRegressive (p)
+            - Integrated (d)
+            - Moving Average (q)
+            - AIC/BIC metrics
+
+            **4. Stationarity Testing**
+            - Augmented Dickey-Fuller test
+            - Tests null hypothesis
+            - P-value interpretation
+            """)
+
+        with col2:
+            st.markdown("""
+            ### 📄 Data Format Requirements
+
+            **Input Format**: CSV with date column
+
+            **Structure**:
+            ```
+            date,       value
+            2023-01-01, 45.2
+            2023-01-02, 48.7
+            2023-01-03, 52.1
+            ```
+
+            **Requirements**:
+            - Date column (YYYY-MM-DD)
+            - Single numeric value column
+            - Chronological order
+            - Regular intervals preferred
+            - No missing values
+
+            **Typical Data Sizes**:
+            - Daily: 365-1460 samples
+            - Monthly: 12-240 samples
+            - Hourly: 1000+ samples
+
+            **What to Expect**:
+            - Trend: Long-term direction
+            - Seasonality: Repeating patterns
+            - Residuals: Random variation
+            """)
+
+    st.markdown("---")
     tab1, tab2, tab3, tab4 = st.tabs(["ACF/PACF", "Decomposition", "ARIMA", "Stationarity"])
 
     with tab1:
@@ -450,8 +594,75 @@ elif page == "Time Series Analysis":
 
 # PAGE: Predictive Modeling
 elif page == "Predictive Modeling":
-    st.header("Predictive Modeling")
+    st.header("🔮 Predictive Modeling")
 
+    with st.expander("📖 Methods & Data Format Guide", expanded=True):
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown("""
+            ### 📋 Available Methods
+
+            **1. Linear Regression**
+            - Fit model to features
+            - Learn coefficient weights
+            - Predict continuous values
+            - Metrics: R², RMSE, MSE
+            - Train/test split: 80/20
+
+            **2. Feature Importance**
+            - Correlation-based analysis
+            - Absolute correlation ranking
+            - Identifies key predictors
+            - Supports 1-N features
+
+            ### 📊 Model Evaluation
+            - **R² Score**: Explained variance
+            - **RMSE**: Root mean squared error
+            - **Coefficients**: Feature weights
+            - **Train Size**: 80% of data
+            - **Test Size**: 20% of data
+            """)
+
+        with col2:
+            st.markdown("""
+            ### 📄 Data Format Requirements
+
+            **Input Format**: CSV with features + target
+
+            **Structure**:
+            ```
+            rainfall, temperature, fertilizer, yield
+            25.3,     22.1,        150,        65.2
+            30.5,     25.8,        180,        72.5
+            20.1,     18.5,        120,        55.8
+            ```
+
+            **Requirements**:
+            - Features: All numeric
+            - Target: Single numeric column
+            - Last column = target variable
+            - No missing values
+            - Features: 2-N columns
+
+            **Feature Types**:
+            - Continuous: Any numeric values
+            - Categorical*: Converted to numeric
+              (*needs preprocessing)
+
+            **Data Sizes**:
+            - Minimum: 30 samples
+            - Recommended: 100-500
+            - Maximum: 10,000+
+
+            **Typical Applications**:
+            - Yield prediction
+            - Pest forecasting
+            - Irrigation scheduling
+            - Resource optimization
+            """)
+
+    st.markdown("---")
     tab1, tab2 = st.tabs(["Linear Regression", "Feature Importance"])
 
     with tab1:
