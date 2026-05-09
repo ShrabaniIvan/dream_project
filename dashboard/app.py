@@ -122,24 +122,24 @@ elif page == "Descriptive Statistics":
             st.info(f"📊 Dataset: {selected_corr_dataset} ({len(df)} samples)")
 
             if st.button("Calculate Correlation", key="calc_corr"):
-            payload = {"data": {col: df[col].tolist() for col in df.columns}}
+                payload = {"data": {col: df[col].tolist() for col in df.columns}}
 
-            try:
-                response = requests.post(
-                    f"{DESCRIPTIVE_STATS_URL}/correlation-matrix",
-                    json=payload,
-                    timeout=5
-                )
+                try:
+                    response = requests.post(
+                        f"{DESCRIPTIVE_STATS_URL}/correlation-matrix",
+                        json=payload,
+                        timeout=5
+                    )
 
-                if response.status_code == 200:
-                    result = response.json()
-                    corr_df = pd.DataFrame(result['correlation'])
-                    st.dataframe(corr_df, use_container_width=True)
-                else:
-                    st.error(f"API Error: {response.status_code}")
+                    if response.status_code == 200:
+                        result = response.json()
+                        corr_df = pd.DataFrame(result['correlation'])
+                        st.dataframe(corr_df, use_container_width=True)
+                    else:
+                        st.error(f"API Error: {response.status_code}")
 
-            except requests.exceptions.RequestException as e:
-                st.error(f"Connection error: {e}")
+                except requests.exceptions.RequestException as e:
+                    st.error(f"Connection error: {e}")
 
     with tab3:
         st.subheader("Hypothesis Testing")
