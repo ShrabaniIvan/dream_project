@@ -425,28 +425,28 @@ elif page == "Time Series Analysis":
                     "name": column
                 }
 
-            try:
-                response = requests.post(
-                    f"{TIME_SERIES_URL}/adf-test",
-                    json=payload,
-                    timeout=5
-                )
+                try:
+                    response = requests.post(
+                        f"{TIME_SERIES_URL}/adf-test",
+                        json=payload,
+                        timeout=5
+                    )
 
-                if response.status_code == 200:
-                    result = response.json()
-                    st.write(f"**Test Statistic**: {result['test_statistic']:.4f}")
-                    st.write(f"**P-value**: {result['p_value']:.4f}")
-                    st.write(f"**Lags Used**: {result['n_lags']}")
+                    if response.status_code == 200:
+                        result = response.json()
+                        st.write(f"**Test Statistic**: {result['test_statistic']:.4f}")
+                        st.write(f"**P-value**: {result['p_value']:.4f}")
+                        st.write(f"**Lags Used**: {result['n_lags']}")
 
-                    if result['stationary_at_0.05']:
-                        st.success("✓ Series is stationary (reject null hypothesis)")
+                        if result['stationary_at_0.05']:
+                            st.success("✓ Series is stationary (reject null hypothesis)")
+                        else:
+                            st.warning("⚠️ Series is non-stationary (fail to reject null hypothesis)")
                     else:
-                        st.warning("⚠️ Series is non-stationary (fail to reject null hypothesis)")
-                else:
-                    st.error(f"API Error: {response.status_code}")
+                        st.error(f"API Error: {response.status_code}")
 
-            except requests.exceptions.RequestException as e:
-                st.error(f"Connection error: {e}")
+                except requests.exceptions.RequestException as e:
+                    st.error(f"Connection error: {e}")
 
 # PAGE: Predictive Modeling
 elif page == "Predictive Modeling":
