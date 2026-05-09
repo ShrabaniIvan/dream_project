@@ -28,9 +28,9 @@ def load_sample_data(filename: str, folder: str = "") -> pd.DataFrame:
     """Load sample data from CSV with optional folder."""
     try:
         if folder:
-            path = f"../data/{folder}/{filename}"
+            path = f"/data/{folder}/{filename}"
         else:
-            path = f"../data/{filename}"
+            path = f"/data/{filename}"
         return pd.read_csv(path)
     except FileNotFoundError:
         st.warning(f"Sample data file not found: {filename}")

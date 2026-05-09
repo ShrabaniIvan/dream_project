@@ -48,6 +48,8 @@ services:
       - DESCRIPTIVE_STATS_URL=http://descriptive-stats:8001
       - TIME_SERIES_URL=http://time-series:8002
       - PREDICTIVE_MODELING_URL=http://predictive-modeling:8003
+    volumes:
+      - ./data:/data
     depends_on:
       - descriptive-stats
       - time-series
