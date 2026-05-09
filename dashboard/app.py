@@ -8,6 +8,63 @@ from typing import Dict, Any
 
 # Configure page
 st.set_page_config(page_title="Agricultural Statistics", layout="wide")
+
+# Add background image with semi-transparency
+import base64
+
+@st.cache_data
+def get_base64_image(image_path):
+    """Convert image to base64 for embedding in CSS."""
+    with open(image_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode()
+
+try:
+    img_base64 = get_base64_image("/data/paddy.jpg")
+    background_css = f"""
+    <style>
+    [data-testid="stAppViewContainer"] {{
+        background-image: url("data:image/jpeg;base64,{img_base64}");
+        background-size: cover;
+        background-attachment: fixed;
+        background-position: center;
+        background-repeat: no-repeat;
+    }}
+
+    [data-testid="stAppViewContainer"]::before {{
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.75);
+        z-index: 0;
+    }}
+
+    [data-testid="stHeader"] {{
+        z-index: 1;
+        background-color: rgba(255, 255, 255, 0.95);
+    }}
+
+    [data-testid="stSidebar"] {{
+        background-color: rgba(240, 242, 246, 0.95);
+        z-index: 1;
+    }}
+
+    .main {{
+        z-index: 1;
+    }}
+
+    div[data-testid="stVerticalBlockBorderWrapper"] {{
+        background-color: rgba(255, 255, 255, 0.9);
+        z-index: 1;
+    }}
+    </style>
+    """
+    st.markdown(background_css, unsafe_allow_html=True)
+except FileNotFoundError:
+    st.warning("⚠️ Background image not found")
+
 st.title("🌾 Agricultural Statistics Platform")
 
 # Service URLs
