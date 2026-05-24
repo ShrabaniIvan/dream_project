@@ -61,19 +61,65 @@ try:
         z-index: 1;
     }}
 
-    /* Stunning Table Styling */
+    /* Stunning Table Styling - All table elements */
     [data-testid="stDataFrame"] {{
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
-        border: 2px solid rgba(102, 126, 234, 0.2);
-        background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
+        border-radius: 12px !important;
+        overflow: hidden !important;
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15) !important;
+        border: 2px solid rgba(102, 126, 234, 0.3) !important;
+        background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%) !important;
+        padding: 0 !important;
     }}
 
     /* DataFrame container styling */
     .stDataFrame {{
         border-radius: 12px !important;
         overflow: hidden !important;
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15) !important;
+        border: 2px solid rgba(102, 126, 234, 0.3) !important;
+    }}
+
+    /* Catch all table-like elements */
+    .element-container [role="table"],
+    div[data-testid*="Table"],
+    div[data-testid*="table"] {{
+        border-radius: 12px !important;
+        overflow: hidden !important;
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15) !important;
+        border: 2px solid rgba(102, 126, 234, 0.3) !important;
+    }}
+
+    /* Wrapper for all data displays */
+    .stDataFrameWrapper {{
+        border-radius: 12px !important;
+        overflow: hidden !important;
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15) !important;
+        border: 2px solid rgba(102, 126, 234, 0.3) !important;
+    }}
+
+    /* Element container with tables */
+    .element-container {{
+        border-radius: 12px;
+        overflow: visible;
+    }}
+
+    /* Direct dataframe parent */
+    .stDataFrame > div {{
+        border-radius: 12px !important;
+        overflow: hidden !important;
+    }}
+
+    /* Table body and cells */
+    table {{
+        border-collapse: collapse;
+        border-radius: 12px;
+        overflow: hidden;
+    }}
+
+    /* Add outline to iframe (if used) */
+    iframe {{
+        border-radius: 12px !important;
+        border: 2px solid rgba(102, 126, 234, 0.3) !important;
         box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15) !important;
     }}
 
