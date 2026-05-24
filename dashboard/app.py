@@ -5,6 +5,12 @@ import pandas as pd
 import numpy as np
 import os
 from typing import Dict, Any
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Set beautiful seaborn style
+sns.set_style("whitegrid")
+sns.set_palette("husl")
 
 # Configure page
 st.set_page_config(page_title="Agricultural Statistics", layout="wide")
@@ -338,6 +344,38 @@ def display_beautiful_table(df: pd.DataFrame, title: str = ""):
         use_container_width=True,
         hide_index=False
     )
+
+def create_beautiful_plot(data: list, title: str = "", xlabel: str = "Index", ylabel: str = "Value"):
+    """Create a beautiful plot with seaborn styling."""
+    fig, ax = plt.subplots(figsize=(12, 5), dpi=100)
+
+    # Plot with seaborn styling
+    x_vals = np.arange(len(data))
+    sns.lineplot(x=x_vals, y=data, ax=ax, linewidth=3, marker='o', markersize=6,
+                 color='#667eea', label='Data')
+
+    # Enhanced styling
+    ax.set_xlabel(xlabel, fontsize=13, fontweight='bold', labelpad=10)
+    ax.set_ylabel(ylabel, fontsize=13, fontweight='bold', labelpad=10)
+    ax.set_title(title, fontsize=15, fontweight='bold', pad=20, color='#667eea')
+
+    # Grid and spines
+    ax.grid(True, alpha=0.3, linestyle='--')
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    for spine in ['left', 'bottom']:
+        ax.spines[spine].set_linewidth(2)
+        ax.spines[spine].set_color('#667eea')
+
+    # Tick styling
+    ax.tick_params(axis='both', which='major', labelsize=11, width=2, length=6, colors='#333')
+
+    # Remove legend if it exists
+    if ax.get_legend():
+        ax.get_legend().remove()
+
+    plt.tight_layout()
+    return fig
 
 # PAGE: Home
 if page == "Home":
@@ -676,12 +714,14 @@ elif page == "Time Series Analysis":
                         col1, col2 = st.columns(2)
 
                         with col1:
-                            st.line_chart(result['acf'], use_container_width=True)
-                            st.caption("ACF Plot")
+                            fig = create_beautiful_plot(result['acf'], title="ACF Plot", xlabel="Lag", ylabel="Autocorrelation")
+                            st.pyplot(fig, use_container_width=True)
+                            plt.close(fig)
 
                         with col2:
-                            st.line_chart(result['pacf'], use_container_width=True)
-                            st.caption("PACF Plot")
+                            fig = create_beautiful_plot(result['pacf'], title="PACF Plot", xlabel="Lag", ylabel="Partial Autocorrelation")
+                            st.pyplot(fig, use_container_width=True)
+                            plt.close(fig)
                     else:
                         st.error(f"API Error: {response.status_code}")
 
@@ -721,17 +761,21 @@ elif page == "Time Series Analysis":
                     if response.status_code == 200:
                         result = response.json()
 
-                        st.line_chart(result['observed'], use_container_width=True)
-                        st.caption("Observed")
+                        fig = create_beautiful_plot(result['observed'], title="Observed Data", xlabel="Time", ylabel="Value")
+                        st.pyplot(fig, use_container_width=True)
+                        plt.close(fig)
 
-                        st.line_chart(result['trend'], use_container_width=True)
-                        st.caption("Trend")
+                        fig = create_beautiful_plot(result['trend'], title="Trend Component", xlabel="Time", ylabel="Trend")
+                        st.pyplot(fig, use_container_width=True)
+                        plt.close(fig)
 
-                        st.line_chart(result['seasonal'], use_container_width=True)
-                        st.caption("Seasonal")
+                        fig = create_beautiful_plot(result['seasonal'], title="Seasonal Component", xlabel="Time", ylabel="Seasonal")
+                        st.pyplot(fig, use_container_width=True)
+                        plt.close(fig)
 
-                        st.line_chart(result['residual'], use_container_width=True)
-                        st.caption("Residual")
+                        fig = create_beautiful_plot(result['residual'], title="Residual Component", xlabel="Time", ylabel="Residual")
+                        st.pyplot(fig, use_container_width=True)
+                        plt.close(fig)
                     else:
                         st.error(f"API Error: {response.status_code}")
 
@@ -1015,7 +1059,20 @@ elif page == "Predictive Modeling":
                         )
 
                         st.markdown('<h4 style="color: #667eea; margin-top: 20px; margin-bottom: 15px;">📊 Feature Importance Distribution</h4>', unsafe_allow_html=True)
-                        st.bar_chart(importance_df.set_index('Feature')['Abs Correlation'])
+
+                        # Create beautiful bar chart
+                        fig, ax = plt.subplots(figsize=(12, 5), dpi=100)
+                        sns.barplot(x='Abs Correlation', y='Feature', data=importance_df, ax=ax, color='#667eea', palette='Blues_r')
+                        ax.set_xlabel('Absolute Correlation', fontsize=13, fontweight='bold', labelpad=10)
+                        ax.set_ylabel('Feature', fontsize=13, fontweight='bold', labelpad=10)
+                        ax.set_title('Feature Importance Ranking', fontsize=15, fontweight='bold', pad=20, color='#667eea')
+                        ax.spines['top'].set_visible(False)
+                        ax.spines['right'].set_visible(False)
+                        ax.grid(axis='x', alpha=0.3, linestyle='--')
+                        plt.tight_layout()
+                        st.pyplot(fig, use_container_width=True)
+                        plt.close(fig)
+
                         st.markdown('---')
                         display_beautiful_table(importance_df, "🎯 Feature Rankings")
                     else:
