@@ -109,11 +109,66 @@ try:
         overflow: hidden !important;
     }}
 
-    /* Table body and cells */
+    /* Table body and cells - INTERNAL STRUCTURE */
     table {{
         border-collapse: collapse;
         border-radius: 12px;
         overflow: hidden;
+        width: 100%;
+    }}
+
+    /* Table headers */
+    thead {{
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }}
+
+    th {{
+        border: 1px solid rgba(102, 126, 234, 0.5) !important;
+        padding: 14px 12px !important;
+        text-align: left;
+        font-weight: 600;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        white-space: nowrap;
+    }}
+
+    /* Table rows */
+    tr {{
+        border-bottom: 1px solid rgba(102, 126, 234, 0.2) !important;
+        transition: background-color 0.2s ease;
+    }}
+
+    tr:hover {{
+        background-color: rgba(102, 126, 234, 0.05) !important;
+    }}
+
+    /* Alternate row colors */
+    tbody tr:nth-child(even) {{
+        background-color: rgba(102, 126, 234, 0.02) !important;
+    }}
+
+    tbody tr:nth-child(odd) {{
+        background-color: rgba(255, 255, 255, 0.5) !important;
+    }}
+
+    /* Table cells */
+    td {{
+        border: 1px solid rgba(102, 126, 234, 0.15) !important;
+        padding: 12px !important;
+        text-align: left;
+        color: #333;
+    }}
+
+    /* First column styling */
+    td:first-child {{
+        font-weight: 500;
+        color: #667eea;
+    }}
+
+    /* Last cell in row */
+    td:last-child {{
+        border-right: 1px solid rgba(102, 126, 234, 0.15) !important;
     }}
 
     /* Add outline to iframe (if used) */
