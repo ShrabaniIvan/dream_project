@@ -43,11 +43,12 @@ try:
 
     [data-testid="stHeader"] {{
         z-index: 1;
-        background-color: rgba(255, 255, 255, 0.95);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
     }}
 
     [data-testid="stSidebar"] {{
-        background-color: rgba(240, 242, 246, 0.95);
+        background: linear-gradient(180deg, #f5f7fa 0%, #c3cfe2 100%);
         z-index: 1;
     }}
 
@@ -56,8 +57,135 @@ try:
     }}
 
     div[data-testid="stVerticalBlockBorderWrapper"] {{
-        background-color: rgba(255, 255, 255, 0.9);
+        background-color: rgba(255, 255, 255, 0.95);
         z-index: 1;
+    }}
+
+    /* Stunning Table Styling */
+    [data-testid="stDataFrame"] {{
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
+    }}
+
+    /* DataFrame container styling */
+    .stDataFrame {{
+        border-radius: 12px !important;
+        overflow: hidden !important;
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15) !important;
+    }}
+
+    /* Metric cards - Beautiful gradient borders */
+    [data-testid="metric-container"] {{
+        border-radius: 10px;
+        padding: 20px;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.08);
+        transition: all 0.3s ease;
+    }}
+
+    [data-testid="metric-container"]:hover {{
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+        border: 2px solid rgba(102, 126, 234, 0.4);
+        transform: translateY(-2px);
+    }}
+
+    /* Expander styling */
+    [data-testid="stExpander"] {{
+        border-radius: 10px !important;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.08) !important;
+        border: 2px solid rgba(102, 126, 234, 0.15) !important;
+        background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%) !important;
+    }}
+
+    /* Tab styling */
+    [data-testid="stTabs"] {{
+        border-bottom: 3px solid rgba(102, 126, 234, 0.2);
+    }}
+
+    .stTabs [aria-selected="true"] {{
+        color: #667eea;
+        border-bottom: 3px solid #667eea;
+        font-weight: 600;
+    }}
+
+    /* Button styling */
+    .stButton > button {{
+        border-radius: 8px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        transition: all 0.3s ease;
+    }}
+
+    .stButton > button:hover {{
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        transform: translateY(-2px);
+    }}
+
+    /* Info/Warning/Success boxes */
+    .stAlert {{
+        border-radius: 10px;
+        border-left: 5px solid rgba(102, 126, 234, 0.5);
+        padding: 15px 20px;
+        backdrop-filter: blur(10px);
+    }}
+
+    /* Heading styling */
+    h1 {{
+        color: white;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        font-size: 2.5em;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }}
+
+    h2, h3 {{
+        color: #667eea;
+        font-weight: 600;
+        margin-top: 25px;
+        margin-bottom: 15px;
+    }}
+
+    /* Code blocks styling */
+    code {{
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        border-radius: 6px;
+        padding: 2px 6px;
+        color: #764ba2;
+        font-family: 'Monaco', 'Menlo', monospace;
+    }}
+
+    /* Divider styling */
+    hr {{
+        border: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.3), transparent);
+        margin: 25px 0;
+    }}
+
+    /* Select box and input styling */
+    .stSelectbox, .stNumberInput, .stSlider {{
+        border-radius: 8px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
+    }}
+
+    .stSelectbox > div > div, .stNumberInput > div > div {{
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }}
+
+    .stSelectbox > div > div:hover, .stNumberInput > div > div:hover {{
+        border: 2px solid rgba(102, 126, 234, 0.4);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
     }}
     </style>
     """
@@ -65,7 +193,13 @@ try:
 except FileNotFoundError:
     st.warning("⚠️ Background image not found")
 
-st.title("🌾 Agricultural Statistics Platform")
+# Custom title with styling
+st.markdown("""
+    <div style="text-align: center; padding: 30px 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; margin-bottom: 30px; color: white;">
+        <h1 style="margin: 0; color: white; font-size: 3em; text-shadow: 0 2px 10px rgba(0,0,0,0.3);">🌾 Agricultural Statistics Platform</h1>
+        <p style="margin: 10px 0 0 0; font-size: 1.1em; opacity: 0.9;">Advanced Analytics for Agricultural Data</p>
+    </div>
+""", unsafe_allow_html=True)
 
 # Service URLs
 DESCRIPTIVE_STATS_URL = os.getenv("DESCRIPTIVE_STATS_URL", "http://localhost:8001")
@@ -92,6 +226,17 @@ def load_sample_data(filename: str, folder: str = "") -> pd.DataFrame:
     except FileNotFoundError:
         st.warning(f"Sample data file not found: {filename}")
         return None
+
+def display_beautiful_table(df: pd.DataFrame, title: str = ""):
+    """Display dataframe with beautiful styling."""
+    if title:
+        st.markdown(f'<h4 style="color: #667eea; margin-bottom: 15px;">{title}</h4>', unsafe_allow_html=True)
+
+    st.dataframe(
+        df,
+        use_container_width=True,
+        hide_index=False
+    )
 
 # PAGE: Home
 if page == "Home":
@@ -271,7 +416,7 @@ elif page == "Descriptive Statistics":
                     if response.status_code == 200:
                         result = response.json()
                         corr_df = pd.DataFrame(result['correlation'])
-                        st.dataframe(corr_df, use_container_width=True)
+                        display_beautiful_table(corr_df, "📊 Correlation Matrix")
                     else:
                         st.error(f"API Error: {response.status_code}")
 
@@ -708,12 +853,14 @@ elif page == "Predictive Modeling":
                         with col3:
                             st.metric("MSE", f"{result['mse']:.4f}")
 
-                        st.subheader("Coefficients")
-                        coef_df = pd.DataFrame([
-                            {"Feature": k, "Coefficient": v}
-                            for k, v in result['coefficients'].items()
-                        ])
-                        st.dataframe(coef_df, use_container_width=True)
+                        st.markdown('---')
+                        display_beautiful_table(
+                            pd.DataFrame([
+                                {"Feature": k, "Coefficient": v}
+                                for k, v in result['coefficients'].items()
+                            ]),
+                            "📈 Model Coefficients"
+                        )
 
                         st.write(f"**Intercept**: {result['intercept']:.4f}")
                         st.write(f"**Train/Test Split**: {result['train_size']}/{result['test_size']}")
@@ -766,8 +913,10 @@ elif page == "Predictive Modeling":
                             'Abs Correlation', ascending=False
                         )
 
+                        st.markdown('<h4 style="color: #667eea; margin-top: 20px; margin-bottom: 15px;">📊 Feature Importance Distribution</h4>', unsafe_allow_html=True)
                         st.bar_chart(importance_df.set_index('Feature')['Abs Correlation'])
-                        st.dataframe(importance_df, use_container_width=True)
+                        st.markdown('---')
+                        display_beautiful_table(importance_df, "🎯 Feature Rankings")
                     else:
                         st.error(f"API Error: {response.status_code}")
 
