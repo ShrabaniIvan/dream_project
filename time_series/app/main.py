@@ -46,9 +46,10 @@ def decompose_series(input_data: TimeSeriesInput, period: int = 12) -> Dict[str,
     }
 
 @app.post("/arima-fit")
-def fit_arima(input_data: TimeSeriesInput, order: tuple = (1, 1, 1)) -> Dict[str, Any]:
+def fit_arima(input_data: TimeSeriesInput, p: int = 1, d: int = 1, q: int = 1) -> Dict[str, Any]:
     """Fit ARIMA model to time series."""
     series = pd.Series(input_data.values)
+    order = (p, d, q)
 
     try:
         model = sm.tsa.ARIMA(series, order=order)
