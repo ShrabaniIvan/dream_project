@@ -1,1 +1,0 @@
-I am using a windows laptop, please provide step by step instructions on how to set up git and github on windows.
