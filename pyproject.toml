@@ -31,7 +31,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["dashboard", "descriptive_stats", "time_series", "predictive_modeling"]
+packages = ["src/dream_project"]
 
 [tool.black]
 line-length = 120
