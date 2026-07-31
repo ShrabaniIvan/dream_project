@@ -43,8 +43,7 @@ Thumbs.db
 # ==============================
 # Test data
 # ==============================
-data/*
-!data/.gitkeep
+data/
 
 # ==============================
 # Secrets / keys
@@ -52,3 +51,8 @@ data/*
 *.pem
 *.key
 *.crt
+
+#===============================
+#Example markdown files
+#===============================
+example_project_markdowns 
