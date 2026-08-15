@@ -126,6 +126,38 @@ def strength_label(coef: float, is_cramers: bool = False) -> str:
     return "Weak"
 
 
+def build_correlation_prompt(result: dict, col_a: str, type_a: str, col_b: str, type_b: str, max_tokens: int) -> str:
+    """Build the GPT prompt for a single correlation pair."""
+    method = result["method"]
+    is_chi = "Chi" in method
+
+    stats_lines = [
+        f"  - Method: {method}",
+        f"  - {result['label']}: {result['coefficient']}",
+        f"  - p-value: {result['p_value']}",
+        f"  - N: {result['n']}",
+    ]
+    if is_chi:
+        stats_lines.insert(2, f"  - χ²: {result['chi2']}")
+        stats_lines.insert(3, f"  - Degrees of freedom: {result['dof']}")
+        ct_str = f"\nContingency table:\n{result['contingency_table'].to_string()}"
+    else:
+        ct_str = ""
+
+    return (
+        f"The following correlation analysis was performed on an agricultural dataset.\n\n"
+        f"Variable A: {col_a} (type: {type_a})\n"
+        f"Variable B: {col_b} (type: {type_b})\n\n"
+        f"Results:\n" + "\n".join(stats_lines) + ct_str + "\n\n"
+        f"Provide an interpretation as a numbered list. Cover:\n"
+        f"1. Whether the association is statistically significant and what the p-value implies\n"
+        f"2. The strength and direction (if applicable) of the association\n"
+        f"3. What this means in practical/agricultural terms\n"
+        f"4. Any caveats or limitations the analyst should be aware of\n\n"
+        f"Be concise — your response must fit within {max_tokens} tokens total."
+    )
+
+
 def interpret(result: dict, col_a: str, col_b: str) -> str:
     """Return a pre-determined rule-based interpretation string."""
     p, coef, method = result["p_value"], result["coefficient"], result["method"]

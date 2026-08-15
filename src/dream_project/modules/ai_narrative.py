@@ -15,9 +15,9 @@ def _get_client() -> OpenAI:
     return _client
 
 
-def generate_narrative(prompt: str) -> str:
+def generate_narrative(prompt: str, model: str | None = None) -> str:
     """Send prompt to OpenAI and return the narrative text."""
-    model = os.environ.get("dp_OPENAI_MODEL", "gpt-4o-mini")
+    model = model or os.environ.get("dp_OPENAI_MODEL", "gpt-4o-mini")
     max_tokens = int(os.environ.get("dp_OPENAI_MAX_TOKENS", 1000))
     response = _get_client().chat.completions.create(
         model=model,

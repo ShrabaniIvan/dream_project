@@ -1,5 +1,6 @@
 """Agricultural Statistics Dashboard — entry point."""
 import streamlit as st
+from dream_project.modules.theme import apply_sidebar_style
 
 st.set_page_config(
     page_title="Agricultural Statistics Dashboard",
@@ -7,6 +8,7 @@ st.set_page_config(
     layout="wide",
 )
 
+apply_sidebar_style()
 st.title("Agricultural Statistics Dashboard")
 st.markdown(
     """

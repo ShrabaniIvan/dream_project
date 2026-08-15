@@ -8,6 +8,7 @@ import matplotlib.ticker as ticker
 import statsmodels.api as sm
 from dotenv import load_dotenv
 
+from dream_project.modules.theme import apply_sidebar_style
 from dream_project.modules.descriptive_stats import (
     load_data, detect_corrupt, compute_stats, to_download_bytes, build_narrative_prompt,
 )
@@ -16,6 +17,7 @@ from dream_project.modules.ai_narrative import generate_narrative
 load_dotenv()
 
 st.set_page_config(page_title="Descriptive Statistics", layout="wide")
+apply_sidebar_style()
 st.title("Descriptive Statistics")
 
 CHART_OPTIONS = ["Histogram", "Boxplot", "Violin Plot", "KDE Plot", "QQ-Plot"]
@@ -84,6 +86,7 @@ def _render_chart(chart_type: str, series, col_name: str, fontsize: int):
 
 # ── 1. File upload ────────────────────────────────────────────────────────────
 
+st.caption("Upload your dataset as a CSV or Excel file. Each column will be analyzed one at a time.")
 uploaded = st.file_uploader("Upload dataset (.csv or .xlsx)", type=["csv", "xlsx"])
 if not uploaded:
     st.info("Upload a file to begin.")
@@ -94,6 +97,7 @@ st.success(f"Loaded **{uploaded.name}** — {df.shape[0]} rows × {df.shape[1]} 
 
 # ── 2. Column selection ───────────────────────────────────────────────────────
 
+st.caption("Select the numeric column to analyze. Non-numeric columns will not produce meaningful statistics.")
 col_name = st.selectbox("Choose Column", ["— select —"] + list(df.columns))
 if col_name == "— select —":
     st.stop()
@@ -125,6 +129,7 @@ st.divider()
 
 # ── 3. Run Analysis (gated) ───────────────────────────────────────────────────
 
+st.caption("Click **Run Analysis** to compute statistics. Re-run any time you change the column selection.")
 if st.button("Run Analysis", type="primary"):
     st.session_state["analysis_ready"] = True
     st.session_state["analysis_col"] = col_name
@@ -146,6 +151,7 @@ st.divider()
 # ── 5. Visualization ──────────────────────────────────────────────────────────
 
 st.subheader("Visualization")
+st.caption("Choose one or more chart types. Use a **Histogram** or **KDE Plot** to see the distribution shape; a **Boxplot** or **Violin Plot** to spot outliers and spread; a **QQ-Plot** to assess normality.")
 selected_charts = st.multiselect("Select chart type(s)", CHART_OPTIONS, default=["Histogram"])
 fontsize = st.slider("Label / tick font size", min_value=8, max_value=20, value=11)
 
@@ -160,6 +166,7 @@ st.divider()
 # ── 6. AI Narrative (premium) ─────────────────────────────────────────────────
 
 st.subheader("AI Narrative Interpretation")
+st.caption("Generate a plain-language summary of the statistics above. Requires an OpenAI API key configured in the environment.")
 if st.button("Generate AI Narrative"):
     max_tokens = int(os.environ.get("dp_OPENAI_MAX_TOKENS", 1000))
     with st.spinner("Generating interpretation..."):
