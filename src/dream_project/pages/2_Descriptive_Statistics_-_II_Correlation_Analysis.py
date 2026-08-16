@@ -13,7 +13,7 @@ from dream_project.modules.descriptive_stats import load_data
 from dream_project.modules.correlation import (
     VARIABLE_TYPES, determine_method, detect_corrupt_pair,
     validate_bins, prepare_series,
-    run_pearson, run_spearman, run_chi_square,
+    run_pearson, run_spearman, run_chi_square, run_point_biserial, run_anova,
     strength_label, interpret, build_correlation_prompt,
 )
 from dream_project.modules.ai_narrative import generate_narrative
@@ -38,19 +38,24 @@ with st.expander("How to use this page — variable types and test selection", e
 
 | Variable A | Variable B | Test used |
 |---|---|---|
-| Continuous | Continuous | **Pearson r** — measures linear association |
-| Ordinal | Ordinal | **Spearman ρ** — rank-based, does not assume equal intervals |
-| Ordinal or Nominal | Nominal | **Chi-square / Cramér's V** — tests independence of category counts |
+| Continuous | Continuous | **Pearson r** — linear association; use Spearman when the relationship is monotonic but not linear |
+| Ordinal | Continuous or Ordinal | **Spearman ρ** — rank-based, monotonic association |
+| Nominal | Nominal or Ordinal | **Chi-square / Cramér's V** — tests independence of category counts |
+| Binary Nominal (2 groups) | Continuous | **Point-biserial r** — correlation between a dichotomy and a continuous variable |
+| Nominal (3 + groups) | Continuous | **ANOVA + η²** — tests whether group means differ; η² measures effect size |
 
-> *Rule of thumb:* if either variable is Nominal, the dashboard uses Chi-square regardless of what the other variable is.
-> If both variables are at least Ordinal, Spearman is used unless both are Continuous, in which case Pearson applies.
+> For **Nominal × Continuous** pairs the key question is how many unique categories the nominal variable has.
+> Two categories → point-biserial correlation. Three or more → one-way ANOVA.
 
 ---
 
-**Cramér's V — interpreting effect size**
+**Effect-size benchmarks**
 
-Cramér's V ranges from 0 (no association) to 1 (perfect association).
-Rough benchmarks: V < 0.10 = Weak · 0.10–0.29 = Moderate · ≥ 0.30 = Strong.
+| Measure | Weak | Moderate | Strong |
+|---|---|---|---|
+| Pearson / Spearman / Point-biserial r | abs(r) < 0.30 | 0.30 – 0.69 | ≥ 0.70 |
+| Cramér's V | V < 0.10 | 0.10 – 0.29 | ≥ 0.30 |
+| η² (ANOVA) | η² < 0.06 | 0.06 – 0.13 | ≥ 0.14 |
 """)
 
 # ── 1. File Upload ─────────────────────────────────────────────────────────
@@ -69,7 +74,7 @@ cols = list(df.columns)
 # ── 2. Column Selection ────────────────────────────────────────────────────
 
 st.divider()
-st.caption("Select the primary variable (A) and one or more comparison variables (B). The dashboard will test each A × B pair separately.")
+st.caption("Select the primary variable (A) and one or more comparison variables (B). The dashboard tests each A × B pair independently — the method is chosen automatically based on the variable types you declare below.")
 col_a = st.selectbox("Variable A", ["— select —"] + cols)
 if col_a == "— select —":
     st.stop()
@@ -142,7 +147,7 @@ for col_b in col_b_list:
 # ── 5. Run Analysis ────────────────────────────────────────────────────────
 
 st.divider()
-st.caption("Click **Run Analysis** to compute all selected pairs. For Chi-square pairs, you will see the contingency table first and can choose to continue or skip each one.")
+st.caption("Click **Run Analysis** to compute all selected pairs. Chi-square pairs show a contingency table first — you can review it and then choose to continue or skip. All other test types run immediately.")
 if st.button("Run Analysis", type="primary"):
     st.session_state["corr_ready"] = True
     # Reset pair decisions when re-running
@@ -162,8 +167,17 @@ for col_b in col_b_list:
 
     type_a = types_map[col_a]
     type_b = types_map.get(col_b, "Continuous")
-    method = determine_method(type_a, type_b)
-    method_label = "Chi-square / Cramér's V" if method == "chi-square" else method.title()
+    n_cats_a = df[col_a].nunique() if type_a == "Nominal" else None
+    n_cats_b = df[col_b].nunique() if type_b == "Nominal" else None
+    method = determine_method(type_a, type_b, n_cats_a, n_cats_b)
+    METHOD_LABELS = {
+        "chi-square": "Chi-square / Cramér's V",
+        "pearson": "Pearson r",
+        "spearman": "Spearman ρ",
+        "point-biserial": "Point-biserial r",
+        "anova": "ANOVA + η²",
+    }
+    method_label = METHOD_LABELS.get(method, method.title())
     st.caption(f"Method: **{method_label}** | {col_a}: {type_a}  ·  {col_b}: {type_b}")
 
     # Prepare clean data for this pair
@@ -225,11 +239,18 @@ for col_b in col_b_list:
         result = run_pearson(sa, sb)
     elif method == "spearman":
         result = run_spearman(sa, sb)
+    elif method == "point-biserial":
+        nom_s, cont_s = (sa, sb) if type_a == "Nominal" else (sb, sa)
+        result = run_point_biserial(nom_s, cont_s)
+    elif method == "anova":
+        nom_s, cont_s = (sa, sb) if type_a == "Nominal" else (sb, sa)
+        result = run_anova(nom_s, cont_s)
     else:
         result = run_chi_square(sa, sb)
 
     is_chi = method == "chi-square"
-    strength = strength_label(result["coefficient"], is_cramers=is_chi)
+    is_anova = method == "anova"
+    strength = strength_label(result["coefficient"], is_cramers=is_chi, is_eta2=is_anova)
 
     # ── Stat card ─────────────────────────────────────────────────────────
     if is_chi:
@@ -239,6 +260,12 @@ for col_b in col_b_list:
         c3.metric("p-value", result["p_value"])
         c4.metric("DoF", result["dof"])
         c5.metric("N", result["n"])
+    elif is_anova:
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("F-statistic", result["f_stat"])
+        c2.metric("η² (eta-squared)", result["coefficient"])
+        c3.metric("p-value", result["p_value"])
+        c4.metric("N", result["n"])
     else:
         c1, c2, c3 = st.columns(3)
         c1.metric(f"Coefficient ({result['label']})", result["coefficient"])
@@ -283,7 +310,7 @@ for col_b in col_b_list:
             plt.tight_layout()
             st.pyplot(fig)
             plt.close(fig)
-    else:
+    elif method in ("pearson", "spearman"):
         want_scatter = st.radio(
             "Want scatterplot?", ["No", "Yes"],
             horizontal=True, key=f"scatter_{pair_key}"
@@ -297,6 +324,25 @@ for col_b in col_b_list:
             ax.set_title(f"{col_a} vs {col_b}")
             ax.set_facecolor("#f0f0f0")
             ax.grid(color="white", linewidth=0.8)
+            for spine in ax.spines.values():
+                spine.set_edgecolor("black")
+            plt.tight_layout()
+            st.pyplot(fig)
+            plt.close(fig)
+    else:  # point-biserial or anova — boxplot
+        want_box = st.radio(
+            "Want boxplot?", ["No", "Yes"],
+            horizontal=True, key=f"box_{pair_key}"
+        )
+        if want_box == "Yes":
+            nom_col = col_a if type_a == "Nominal" else col_b
+            cont_col = col_b if type_a == "Nominal" else col_a
+            fig, ax = plt.subplots(figsize=(6, 4))
+            fig.patch.set_facecolor("#f8f8f8")
+            sns.boxplot(data=clean_df, x=nom_col, y=cont_col, ax=ax, palette="YlOrRd")
+            ax.set_title(f"{cont_col} by {nom_col}")
+            ax.set_facecolor("#f0f0f0")
+            ax.grid(color="white", linewidth=0.8, axis="y")
             for spine in ax.spines.values():
                 spine.set_edgecolor("black")
             plt.tight_layout()

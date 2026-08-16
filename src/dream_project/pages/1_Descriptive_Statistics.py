@@ -20,6 +20,52 @@ st.set_page_config(page_title="Descriptive Statistics", layout="wide")
 apply_sidebar_style()
 st.title("Descriptive Statistics")
 
+with st.expander("How to use this page — statistics and charts explained", expanded=False):
+    st.markdown("""
+**What this module does**
+
+Computes summary statistics for a single numeric column in your uploaded dataset and
+visualises its distribution. Use it to check data quality and understand the shape of
+a variable before running association tests.
+
+---
+
+**Statistics computed**
+
+| Statistic | What it tells you |
+|---|---|
+| **Count** | Number of valid (non-missing) observations used in the analysis |
+| **Mean** | Arithmetic average — sensitive to outliers |
+| **Std Dev** | Standard deviation — average spread around the mean |
+| **Variance** | Std Dev squared — useful for comparing variability across variables |
+| **Min / Max** | Smallest and largest values in the dataset |
+| **25th / 50th / 75th Percentile** | Values below which 25%, 50%, and 75% of observations fall; the 50th percentile is the median |
+| **Skewness** | Symmetry of the distribution. Near 0 = symmetric. Positive = right tail (high outliers). Negative = left tail (low outliers). Values beyond ±1 indicate notable skew |
+| **Kurtosis** | Tail heaviness relative to a normal distribution. 0 = normal-like. Positive (leptokurtic) = heavier tails / more outliers. Negative (platykurtic) = lighter tails |
+| **CV%** | Coefficient of Variation — Std Dev as a percentage of the Mean. Useful for comparing variability between variables measured in different units |
+
+---
+
+**Charts**
+
+| Chart | Best used for |
+|---|---|
+| **Histogram** | Seeing the overall frequency distribution and spotting gaps or clusters |
+| **KDE Plot** | A smoothed version of the histogram — better for comparing shapes across groups |
+| **Boxplot** | Quickly spotting the median, IQR, and outliers (points beyond the whiskers) |
+| **Violin Plot** | Like a boxplot but also shows the full distribution shape — useful when data is multimodal |
+| **QQ-Plot** | Assessing normality — points close to the diagonal line suggest a normal distribution; S-curves or heavy departures suggest non-normality |
+
+---
+
+**Interpreting skewness and kurtosis for agricultural data**
+
+Many agricultural variables (yield, rainfall, pest counts) are right-skewed.
+A strong positive skew (> 1) often indicates a few unusually high observations — worth checking whether these are real measurements or data entry errors.
+High kurtosis alongside high skew can signal that parametric tests (which assume normality) may give unreliable results on this variable.
+""")
+
+
 CHART_OPTIONS = ["Histogram", "Boxplot", "Violin Plot", "KDE Plot", "QQ-Plot"]
 
 # ── chart styling helpers ────────────────────────────────────────────────────

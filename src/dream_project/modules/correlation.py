@@ -8,10 +8,28 @@ from scipy.stats import chi2_contingency
 VARIABLE_TYPES = ["Continuous", "Ordinal", "Nominal"]
 
 
-def determine_method(type_a: str, type_b: str) -> str:
-    """Return analysis method based on variable types."""
-    if "Nominal" in (type_a, type_b):
+def determine_method(type_a: str, type_b: str, n_cats_a: int = None, n_cats_b: int = None) -> str:
+    """Return analysis method based on variable types.
+
+    Nominal × Nominal/Ordinal  → chi-square
+    Binary Nominal × Continuous → point-biserial
+    Nominal (3+) × Continuous  → anova
+    Ordinal × anything else    → spearman
+    Continuous × Continuous    → pearson
+    """
+    nom_a, nom_b = type_a == "Nominal", type_b == "Nominal"
+    cont_a, cont_b = type_a == "Continuous", type_b == "Continuous"
+
+    if nom_a and nom_b:
         return "chi-square"
+    if nom_a and type_b == "Ordinal":
+        return "chi-square"
+    if type_a == "Ordinal" and nom_b:
+        return "chi-square"
+    if nom_a and cont_b:
+        return "point-biserial" if (n_cats_a or 0) == 2 else "anova"
+    if cont_a and nom_b:
+        return "point-biserial" if (n_cats_b or 0) == 2 else "anova"
     if "Ordinal" in (type_a, type_b):
         return "spearman"
     return "pearson"
@@ -115,11 +133,51 @@ def run_chi_square(a: pd.Series, b: pd.Series) -> dict:
     }
 
 
-def strength_label(coef: float, is_cramers: bool = False) -> str:
+def run_point_biserial(nominal: pd.Series, continuous: pd.Series) -> dict:
+    """Point-biserial correlation for binary nominal × continuous."""
+    cats = sorted(nominal.astype(str).unique())
+    binary = (nominal.astype(str) == cats[1]).astype(int)
+    r, p = stats.pointbiserialr(binary, continuous.astype(float))
+    return {
+        "method": "Point-biserial",
+        "label": "r_pb",
+        "coefficient": round(float(r), 4),
+        "p_value": round(float(p), 4),
+        "n": len(nominal),
+        "categories": cats,  # index 0 coded as 0, index 1 coded as 1
+    }
+
+
+def run_anova(nominal: pd.Series, continuous: pd.Series) -> dict:
+    """One-way ANOVA + η² for nominal (3+ groups) × continuous."""
+    cont = continuous.astype(float)
+    group_labels = nominal.astype(str).unique()
+    groups = [cont[nominal.astype(str) == g] for g in group_labels]
+    f, p = stats.f_oneway(*groups)
+    grand_mean = cont.mean()
+    ss_between = sum(len(g) * (g.mean() - grand_mean) ** 2 for g in groups)
+    ss_total = ((cont - grand_mean) ** 2).sum()
+    eta2 = ss_between / ss_total if ss_total > 0 else 0.0
+    return {
+        "method": "ANOVA",
+        "label": "η²",
+        "coefficient": round(float(eta2), 4),
+        "p_value": round(float(p), 4),
+        "n": len(nominal),
+        "f_stat": round(float(f), 4),
+        "groups": int(nominal.nunique()),
+    }
+
+
+def strength_label(coef: float, is_cramers: bool = False, is_eta2: bool = False) -> str:
     v = abs(coef)
     if is_cramers:
         if v >= 0.3: return "Strong"
         if v >= 0.1: return "Moderate"
+        return "Weak"
+    if is_eta2:
+        if v >= 0.14: return "Strong"
+        if v >= 0.06: return "Moderate"
         return "Weak"
     if v >= 0.7: return "Strong"
     if v >= 0.3: return "Moderate"
@@ -130,6 +188,7 @@ def build_correlation_prompt(result: dict, col_a: str, type_a: str, col_b: str, 
     """Build the GPT prompt for a single correlation pair."""
     method = result["method"]
     is_chi = "Chi" in method
+    is_anova = method == "ANOVA"
 
     stats_lines = [
         f"  - Method: {method}",
@@ -137,12 +196,14 @@ def build_correlation_prompt(result: dict, col_a: str, type_a: str, col_b: str, 
         f"  - p-value: {result['p_value']}",
         f"  - N: {result['n']}",
     ]
+    ct_str = ""
     if is_chi:
         stats_lines.insert(2, f"  - χ²: {result['chi2']}")
         stats_lines.insert(3, f"  - Degrees of freedom: {result['dof']}")
         ct_str = f"\nContingency table:\n{result['contingency_table'].to_string()}"
-    else:
-        ct_str = ""
+    elif is_anova:
+        stats_lines.insert(2, f"  - F-statistic: {result['f_stat']}")
+        stats_lines.insert(3, f"  - Number of groups: {result['groups']}")
 
     return (
         f"The following correlation analysis was performed on an agricultural dataset.\n\n"
@@ -159,9 +220,11 @@ def build_correlation_prompt(result: dict, col_a: str, type_a: str, col_b: str, 
 
 
 def interpret(result: dict, col_a: str, col_b: str) -> str:
-    """Return a pre-determined rule-based interpretation string."""
+    """Return a rule-based interpretation string."""
     p, coef, method = result["p_value"], result["coefficient"], result["method"]
     is_chi = "Chi" in method
+    is_anova = method == "ANOVA"
+    is_pb = method == "Point-biserial"
 
     if p >= 0.05:
         return (
@@ -169,15 +232,34 @@ def interpret(result: dict, col_a: str, col_b: str) -> str:
             f"(p = {p}). The result may be due to chance."
         )
 
-    strength = strength_label(coef, is_cramers=is_chi)
-
     if is_chi:
+        strength = strength_label(coef, is_cramers=True)
         return (
             f"**{strength} association** between **{col_a}** and **{col_b}** "
             f"(Cramér's V = {coef}, p = {p}). The categories are not independent."
         )
 
+    if is_anova:
+        strength = strength_label(coef, is_eta2=True)
+        return (
+            f"**{strength} group difference** — one-way ANOVA is significant "
+            f"(F = {result['f_stat']}, p = {p}, η² = {coef}). "
+            f"**{col_a}** group membership explains {coef * 100:.1f}% of variance in **{col_b}**."
+        )
+
+    strength = strength_label(coef)
     direction = "positive" if coef > 0 else "negative"
+
+    if is_pb:
+        cats = result.get("categories", ["0", "1"])
+        return (
+            f"**{strength} {direction} point-biserial correlation** (r_pb = {coef}, p = {p}). "
+            f"Higher values of **{col_b}** tend to be associated with the '{cats[1]}' group of **{col_a}**."
+            if direction == "positive" else
+            f"**{strength} {direction} point-biserial correlation** (r_pb = {coef}, p = {p}). "
+            f"Higher values of **{col_b}** tend to be associated with the '{cats[0]}' group of **{col_a}**."
+        )
+
     if strength == "Strong":
         verb = "increases substantially" if direction == "positive" else "decreases substantially"
         return f"**Strong {direction} correlation** — as **{col_a}** increases, **{col_b}** tends to {verb}."
