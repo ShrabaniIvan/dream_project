@@ -91,6 +91,11 @@ with tab_poly:
         f"Auto-selected: degree **{poly_result['degree']}**, alpha **{poly_result['alpha']}**, "
         f"l1_ratio **{poly_result['l1_ratio']}** (0 = Ridge, 1 = Lasso)"
     )
+    if poly_result["skipped_degrees"]:
+        st.caption(
+            f"Degree(s) {', '.join(map(str, poly_result['skipped_degrees']))} were skipped — "
+            "too few training rows for that many polynomial features."
+        )
     c1, c2, c3 = st.columns(3)
     c1.metric("R²", poly_result["r2"])
     c2.metric("RMSE", poly_result["rmse"])
@@ -111,6 +116,13 @@ with tab_poly:
     plt.close(fig)
 
 with tab_xgb:
+    if len(X) < 100:
+        st.warning(
+            f"Only {len(X)} rows available. Tree-based models like XGBoost need many more rows "
+            "to learn a smooth, reliable trend — with this little data the fitted curve can look "
+            "jagged or overfit. Prefer the **Polynomial + Regularization** tab for small datasets."
+        )
+
     with st.spinner("Fitting XGBoost (auto-selecting hyperparameters via grid search)..."):
         xgb_result = run_xgboost_regression(X, y)
 
