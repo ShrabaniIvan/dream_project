@@ -71,6 +71,29 @@ st.success(f"Loaded **{uploaded.name}** — {df.shape[0]} rows × {df.shape[1]} 
 
 cols = list(df.columns)
 
+# ── 1b. All-Numeric Correlation Matrix (Heatmap) ───────────────────────────
+
+st.divider()
+st.subheader("Correlation Matrix (All Numeric Variables)")
+
+numeric_cols = df.select_dtypes(include="number").columns.tolist()
+if len(numeric_cols) < 2:
+    st.info("Need at least 2 numeric columns to compute a correlation matrix.")
+else:
+    st.caption(
+        "Pearson r across every numeric column. Values run −1 to +1 — "
+        "red = positive, blue = negative. Strong: |r| ≥ 0.70 · Moderate: 0.30–0.69 · Weak: < 0.30."
+    )
+    corr = df[numeric_cols].corr()
+    fig, ax = plt.subplots(figsize=(max(8, len(numeric_cols)), max(6, len(numeric_cols) - 1)))
+    fig.patch.set_facecolor("#f8f8f8")
+    sns.heatmap(corr, annot=True, fmt=".2f", cmap="coolwarm", center=0, square=True, linewidths=0.5, ax=ax)
+    ax.set_title("Pearson Correlation Matrix", fontsize=13)
+    ax.set_facecolor("#f0f0f0")
+    plt.tight_layout()
+    st.pyplot(fig)
+    plt.close(fig)
+
 # ── 2. Column Selection ────────────────────────────────────────────────────
 
 st.divider()
